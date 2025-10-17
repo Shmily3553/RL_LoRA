@@ -1,0 +1,18 @@
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore any folder or file named "checkpoint" or ".checkpoint"
+checkpoint/
+.checkpoint/
+
+# Ignore datasets folder (and everything inside)
+datasets/
+
+# Optionally ignore large data formats
+*.h5
+*.pt
+*.pth
+*.npz
+*.npy
+*.csv
+
