@@ -10,6 +10,9 @@ from trl import GRPOConfig, GRPOTrainer
 from huggingface_hub import notebook_login
 
 notebook_login()
+torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction = False
+torch.backends.cuda.matmul.allow_fp16_reduced_precision_reduction = True
+torch.backends.cuda.allow_bf16 = False
 
 
 dataset_id = 'lmms-lab/multimodal-open-r1-8k-verified'
@@ -49,7 +52,8 @@ train_dataset = train_dataset.remove_columns(['problem', 'original_question', 'o
 
 model = Qwen3VLForConditionalGeneration.from_pretrained(
     model_name,
-    torch_dtype=torch.bfloat16, # MODIFICATION: Use float16 for full fine-tuning
+    # dtype = torch.float16,
+    # torch_dtype=torch.bfloat16, # MODIFICATION: Use float16 for full fine-tuning
     device_map="auto",
 )
 
@@ -145,14 +149,14 @@ training_args = GRPOConfig(
     # Parameters that control the data preprocessing
     # MODIFICATION: Full fine-tuning requires much more VRAM.
     # Reduced batch size to 1 and added gradient accumulation to prevent OOM errors.
-    per_device_train_batch_size=1,                        # MODIFICATION: Reduced from 2
-    gradient_accumulation_steps=2,                        # MODIFICATION: Added
+    per_device_train_batch_size=2,                        # MODIFICATION: Reduced from 2
+    # gradient_accumulation_steps=2,                        # MODIFICATION: Added
     max_completion_length=1024, # default: 256            # Max completion length produced during training
     num_generations=2, # 2, # default: 8                  # Number of generations produced during trainig for comparison
     max_prompt_length=2048, # default: 512                # Max prompt lenght of the input prompt used for generation during training
 
-    fp16=False, # Disable fp16
-    bf16=True,  # Enable bf16
+    fp16=True, #False, # Disable fp16
+    # bf16=True,  # Enable bf16
 
     # Parameters related to reporting and saving
     output_dir=output_dir,                                # Where to save model checkpoints and logs
@@ -211,7 +215,8 @@ finetuned_model_path = f"{output_dir}" # Replace with your HF username or organi
 # MODIFICATION: Load the fully fine-tuned model directly from the output directory
 model = Qwen3VLForConditionalGeneration.from_pretrained(
     finetuned_model_path,
-    torch_dtype=torch.bfloat16,
+    # dtype = torch.float16,
+    # torch_dtype=torch.bfloat16,
     device_map="auto"
 )
 
